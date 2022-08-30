@@ -1,9 +1,11 @@
 package com.system.employee.entities;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import lombok.Data;
 
 @Data
-public class Employee {
+public class Employee extends RepresentationModel<Employee> {
 
 	private int id;
 	private String firstname;
