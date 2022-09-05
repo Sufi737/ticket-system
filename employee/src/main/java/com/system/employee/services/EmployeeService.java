@@ -1,36 +1,47 @@
 package com.system.employee.services;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.system.employee.entities.Employee;
+import com.system.employee.repositories.EmployeeRepository;
 
 @Service
 public class EmployeeService {
+	
+	@Autowired
+	private EmployeeRepository employeeRepository;
 
-	public Employee getEmployee(Integer id) {
-		Employee employee = new Employee(
-				1,
-				"Sufyan",
-				"Khot",
-				"khotsufyan@gmail.com",
-				"EMP0001",
-				"547304sdfsdf8sdf6s897d6f9sd8f6s9df68s9df86",
-				2,
-				1,
-				1
-		);
+	public Optional<Employee> getEmployee(Integer id) {
+		Optional<Employee> employee = employeeRepository.findById(id);
 		return employee;
 	}
 	
 	public Employee createEmployee(Employee employee) {
+		Employee existingEmp = employeeRepository.findByEmail(employee.getEmail());
+		if (existingEmp != null) {
+			return null;
+		}
+		employee = employeeRepository.save(employee);
 		return employee;
 	}
 	
 	public Employee updateEmployee(Employee employee) {
-		return employee;
+		Optional<Employee> existingEmp = employeeRepository.findById(employee.getId());
+		if (existingEmp.isPresent()) {
+			employee = employeeRepository.save(employee);
+			return employee;
+		}
+		return null;
 	}
 	
-	public String deleteEmployee(Integer id) {
-		return "Employee deleted successfully";
+	public void deleteEmployee(Integer id) {
+		try {
+			employeeRepository.deleteById(id);
+		} catch (Exception e) {
+			//log exception
+		}
 	}
 }

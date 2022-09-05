@@ -1,0 +1,205 @@
+{
+	"info": {
+		"_postman_id": "a86f2fcf-b17b-4c65-bad3-0d48fb1fd02f",
+		"name": "Microservices",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "9018900"
+	},
+	"item": [
+		{
+			"name": "Employee service",
+			"item": [
+				{
+					"name": "Employee",
+					"item": [
+						{
+							"name": "Create New Employee",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstname\": \"Sufyan\",\n    \"lastname\": \"New\",\n    \"email\": \"sufyan@test.com\",\n    \"code\": \"EMP005\",\n    \"managerEmployeeId\": 1,\n    \"departmentId\": 1,\n    \"roleid\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:8080/employee"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Employee",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "http://localhost:8080/employee/5"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Employee",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 9,\n    \"firstname\": \"Sufyan\",\n    \"lastname\": \"Khot\",\n    \"email\": \"sufyan@test1.com\",\n    \"code\": \"EMP006\",\n    \"managerEmployeeId\": 1,\n    \"departmentId\": 1,\n    \"roleid\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:8080/employee"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Employee",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "http://localhost:8080/employee/9"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Role",
+					"item": [
+						{
+							"name": "Get Role",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "http://localhost:8080/role/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Role",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"roleName\": \"TEST\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:8080/role"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Role",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 2,\n    \"roleName\": \"ADMIN\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:8080/role"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete role",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": "http://localhost:8080/role/4"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Department",
+					"item": [
+						{
+							"name": "Get department",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "http://localhost:8080/department/2"
+							},
+							"response": []
+						},
+						{
+							"name": "Create department",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"departmentName\": \"Commerce\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:8080/department"
+							},
+							"response": []
+						},
+						{
+							"name": "Update department",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 5,\n    \"departmentName\": \"Updated\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:8080/department"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete department",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "http://localhost:8080/department/5"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Actuator health status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/health"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
