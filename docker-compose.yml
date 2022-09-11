@@ -1,0 +1,53 @@
+version: "3.7"
+
+services:
+
+  db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=employee
+      - MYSQL_ROOT_PASSWORD=root 
+    ports:
+      - "3306:3306" 
+    volumes:
+      - "./sql-scripts:/docker-entrypoint-initdb.d" 
+    networks:
+      - service-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      
+  configserver:
+    image: employee/configserver:0.0.1-SNAPSHOT
+    ports:
+      - "8071:8071"
+    networks:
+      - service-network
+
+  employee-service:
+    image: employee/employee:0.0.2-SNAPSHOT
+    ports:
+      - "8080:8080"
+    environment:
+      PROFILE: "dev"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      CONFIGSERVER_PORT: "8071"
+      DATABASESERVER_PORT: "3306"
+    networks:
+      - service-network
+    depends_on: 
+      db:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      
+networks:
+  service-network:
+    
+volumes:
+  db:
+    driver: local
