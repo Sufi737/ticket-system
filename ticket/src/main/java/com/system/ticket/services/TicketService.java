@@ -27,16 +27,12 @@ public class TicketService {
 	}
 	
 	public Ticket createTicket(Ticket ticket) {
-		Optional<Ticket> existingTicket = ticketRepository.findByTicketCode(ticket.getTicketCode());
-		if (existingTicket.isPresent()) {
-			return null;
-		}
-		ticket.setTicketCode(this.createTicketCode(ticket.getId()));
 		ticket = ticketRepository.save(ticket);
+		ticket.setTicketCode(this.createTicketCode(ticket.getId()));
 		return ticket;
 	}
 	
-	public Ticket updateDepartment(Ticket ticket) {
+	public Ticket updateTicket(Ticket ticket) {
 		Optional<Ticket> existingTicket = ticketRepository.findById(ticket.getId());
 		if (existingTicket.isPresent()) {
 			ticket = ticketRepository.save(ticket);
@@ -45,9 +41,9 @@ public class TicketService {
 		return null;
 	}
 	
-	public void deleteTicket(Integer id) {
+	public void deleteTicket(String code) {
 		try {
-			ticketRepository.deleteById(id);
+			ticketRepository.deleteByTicketCode(code);
 		} catch (Exception e) {
 			//log exception
 		}
