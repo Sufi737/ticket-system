@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS employee (
-	entity_id int NOT NULL AUTO_INCREMENT, 
+    entity_id int NOT NULL AUTO_INCREMENT, 
     firstname varchar (25), 
     lastname varchar (25),
     email varchar (50),
