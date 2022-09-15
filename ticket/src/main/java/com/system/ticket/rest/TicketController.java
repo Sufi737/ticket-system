@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.system.ticket.entities.Ticket;
+import com.system.ticket.entities.TicketRestRequest;
 import com.system.ticket.services.TicketService;
 
 @RestController
@@ -34,8 +35,8 @@ public class TicketController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> createTicket(@RequestBody Ticket ticket) {
-		ticket = ticketService.createTicket(ticket);
+	public ResponseEntity<?> createTicket(@RequestBody TicketRestRequest ticketRequest) {
+		Ticket ticket = ticketService.createTicket(ticketRequest);
 		return ResponseEntity.ok(ticket);
 	}
 	

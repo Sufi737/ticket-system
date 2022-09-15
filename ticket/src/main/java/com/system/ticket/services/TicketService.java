@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.system.ticket.entities.Ticket;
+import com.system.ticket.entities.TicketRestRequest;
 import com.system.ticket.repositories.TicketRepository;
 
 @Service
@@ -26,7 +27,14 @@ public class TicketService {
 		return ticketRepository.findByTicketCode(ticketCode);
 	}
 	
-	public Ticket createTicket(Ticket ticket) {
+	public Ticket createTicket(TicketRestRequest ticketRequest) {
+		Ticket ticket = new Ticket();
+		ticket.setTitle(ticketRequest.getTitle());
+		ticket.setDescription(ticketRequest.getDescription());
+		ticket.setCreatedBy(ticketRequest.getCreatedBy());
+		ticket.setAssignedTo(ticketRequest.getAssignedTo());
+		ticket.setCreatedAt(ticketRequest.getCreatedAt());
+		ticket.setUpdatedAt(ticketRequest.getUpdatedAt());
 		ticket = ticketRepository.save(ticket);
 		ticket.setTicketCode(this.createTicketCode(ticket.getId()));
 		return ticket;

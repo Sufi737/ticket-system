@@ -15,7 +15,7 @@ public class StatusService {
 	@Autowired
 	private StatusRepository statusRepository;
 	
-	public Optional<Status> getTicketByCode(String statusCode) {
+	public Optional<Status> getStatusByCode(String statusCode) {
 		return statusRepository.findByStatusCode(statusCode);
 	}
 	
@@ -31,15 +31,17 @@ public class StatusService {
 	public Status updateStatus(Status status) {
 		Optional<Status> existingStatus = statusRepository.findByStatusCode(status.getStatusCode());
 		if (existingStatus.isPresent()) {
+			Status existingStatusObject = existingStatus.get();
+			status.setId(existingStatusObject.getId());
 			status = statusRepository.save(status);
 			return status;
 		}
 		return null;
 	}
 	
-	public void deleteStatus(Integer id) {
+	public void deleteStatus(String statusCode) {
 		try {
-			statusRepository.deleteById(id);
+			statusRepository.deleteByStatusCode(statusCode);
 		} catch (Exception e) {
 			//log exception
 		}
