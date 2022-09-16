@@ -1,5 +1,7 @@
 package com.system.ticket.entities;
 
+import java.sql.Date;
+
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +13,8 @@ public class TicketRestRequest {
 	private String description;
 	private String createdBy;
 	private String assignedTo;
-	private String createdAt;
-	private String updatedAt;
-	private String status;
+	private Date createdAt;
+	private Date updatedAt;
+	private String statusCode;
+	
 }

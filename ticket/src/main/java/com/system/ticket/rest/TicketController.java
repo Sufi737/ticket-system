@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.system.ticket.entities.Status;
 import com.system.ticket.entities.Ticket;
 import com.system.ticket.entities.TicketRestRequest;
 import com.system.ticket.services.TicketService;
@@ -36,7 +37,19 @@ public class TicketController {
 	
 	@PostMapping
 	public ResponseEntity<?> createTicket(@RequestBody TicketRestRequest ticketRequest) {
-		Ticket ticket = ticketService.createTicket(ticketRequest);
+		Optional<Status> status = ticketService.getStatusByStatusCode(ticketRequest.getStatusCode());
+		if (status.isEmpty()) {
+			return ResponseEntity.badRequest().body("Status with given code not found");
+		}
+		Ticket ticket = new Ticket();
+		ticket.setStatusId(status.get().getId());
+		ticket.setTitle(ticketRequest.getTitle());
+		ticket.setDescription(ticketRequest.getDescription());
+		ticket.setCreatedBy(ticketRequest.getCreatedBy());
+		ticket.setAssignedTo(ticketRequest.getAssignedTo());
+		ticket.setCreatedAt(ticketRequest.getCreatedAt());
+		ticket.setUpdatedAt(ticketRequest.getUpdatedAt());
+		ticket = ticketService.createTicket(ticket);
 		return ResponseEntity.ok(ticket);
 	}
 	
@@ -52,7 +65,7 @@ public class TicketController {
 		return ResponseEntity.ok(updatedticket);
 	}
 	
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/{ticketCode}")
 	public ResponseEntity<String> deleteTicket(@PathVariable String ticketCode) {
 		ticketService.deleteTicket(ticketCode);
 		return ResponseEntity.ok("Ticket deleted successfully");

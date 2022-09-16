@@ -1,11 +1,15 @@
 package com.system.ticket.entities;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Data;
 
@@ -28,20 +32,19 @@ public class Ticket {
 	@Column(name="description")
 	private String description;
 	
-	@Column(name="datetime")
-	private String datetime;
-	
 	@Column(name="created_by")
 	private String createdBy;
 	
 	@Column(name="assigned_to")
 	private String assignedTo;
 	
-	@Column(name="created_at")
-	private String createdAt;
+	@Column(name="created_at", columnDefinition="DATETIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date createdAt;
 	
-	@Column(name="updated_at")
-	private String updatedAt;
+	@Column(name="updated_at", columnDefinition="DATETIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date updatedAt;
 	
 	@Column(name="status_id")
 	private Integer statusId;
