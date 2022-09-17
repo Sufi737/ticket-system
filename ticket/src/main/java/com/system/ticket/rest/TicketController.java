@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.system.ticket.entities.EmployeeResponseEntity;
 import com.system.ticket.entities.Status;
 import com.system.ticket.entities.Ticket;
+import com.system.ticket.entities.TicketResponseEntity;
 import com.system.ticket.entities.TicketRestRequest;
+import com.system.ticket.services.StatusService;
 import com.system.ticket.services.TicketService;
 
 @RestController
@@ -25,6 +28,12 @@ public class TicketController {
 	@Autowired
 	private TicketService ticketService;
 	
+	@Autowired
+	private StatusService statusService;
+	
+	@Autowired
+	private EmployeeFeignClient employeeFeignClient;
+	
 	@GetMapping("/{code}")
 	public ResponseEntity<?> getTicket(@PathVariable String code) {
 		Optional<Ticket> ticketOptional = ticketService.getTicketByCode(code);
@@ -32,7 +41,22 @@ public class TicketController {
 			return ResponseEntity.ok("Ticket with given id not found");
 		}
 		Ticket ticket = ticketOptional.get();
-		return ResponseEntity.ok(ticket);
+		EmployeeResponseEntity createdByEmployee = employeeFeignClient.getEmployeeByCode(ticket.getCreatedBy());
+		EmployeeResponseEntity assignedToEmployee = employeeFeignClient.getEmployeeByCode(ticket.getCreatedBy());
+		Optional<Status> statusData = statusService.getStatusById(ticket.getStatusId());
+		Status status = statusData.isPresent() ? statusData.get() : null;	
+		TicketResponseEntity ticketResponse = new TicketResponseEntity(
+					ticket.getId(),
+					ticket.getTicketCode(),
+					ticket.getTitle(),
+					ticket.getDescription(),
+					createdByEmployee,
+					assignedToEmployee,
+					ticket.getCreatedAt(),
+					ticket.getUpdatedAt(),
+					status
+				);
+		return ResponseEntity.ok(ticketResponse);
 	}
 	
 	@PostMapping

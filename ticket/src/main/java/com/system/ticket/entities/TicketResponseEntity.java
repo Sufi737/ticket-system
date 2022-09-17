@@ -1,22 +1,20 @@
 package com.system.ticket.entities;
 
-import java.sql.Date;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 @AllArgsConstructor
-public class TicketRestRequest {
-
+public class TicketResponseEntity {
+	private Integer id;
+	private String ticketCode;
 	private String title;
 	private String description;
-	private String createdBy;
-	private String assignedTo;
+	private EmployeeResponseEntity createdBy;
+	private EmployeeResponseEntity assignedTo;
 	private Date createdAt;
 	private Date updatedAt;
-	private String statusCode;
-	
+	private Status status;
 }

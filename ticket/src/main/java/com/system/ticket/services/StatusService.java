@@ -15,6 +15,10 @@ public class StatusService {
 	@Autowired
 	private StatusRepository statusRepository;
 	
+	public Optional<Status> getStatusById(Integer id) {
+		return statusRepository.findById(id);
+	}
+	
 	public Optional<Status> getStatusByCode(String statusCode) {
 		return statusRepository.findByStatusCode(statusCode);
 	}
