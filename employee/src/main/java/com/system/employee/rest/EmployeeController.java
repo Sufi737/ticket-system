@@ -85,6 +85,57 @@ public class EmployeeController {
 			    .withRel("deleteLicense"));
 		return ResponseEntity.ok(employeeRest);
 	}
+	
+	@GetMapping("/code/{code}")
+	public ResponseEntity<?> getEmployeeByCode(@PathVariable String code) {
+		Optional<Employee> employeeOptional = employeeService.getEmployeeByCode(code);
+		if (!employeeOptional.isPresent()) {
+			return ResponseEntity.ok("Employee with give code not found");
+		}
+		Employee employee = employeeOptional.get();
+		Department department = null;
+		if (employee.getRoleid() != null) {
+			Optional<Department> departmentOptional = departmentService.getDepartment(employee.getRoleid());
+			department = departmentOptional.isPresent() ? departmentOptional.get() : null;
+		}
+		Employee manager = null;
+		if (employee.getManagerEmployeeId() != null) {
+			Optional<Employee> managerOptional = employeeService.getEmployee(employee.getManagerEmployeeId());
+			manager = managerOptional.isPresent() ? managerOptional.get() : null;
+		}
+		Role role = null;
+		if (employee.getRoleid() != null) {
+			Optional<Role> roleOpt = roleService.getRole(employee.getRoleid());
+			role = roleOpt.isPresent() ? roleOpt.get() : null;
+		}
+		EmployeeResponseEntity employeeRest = new EmployeeResponseEntity(
+					employee.getId(),
+					employee.getFirstname(),
+					employee.getLastname(),
+					employee.getEmail(),
+					employee.getCode(),
+					manager,
+					department,
+					role
+				);
+		employeeRest.add(
+			    WebMvcLinkBuilder.linkTo(
+			    		WebMvcLinkBuilder.methodOn(EmployeeController.class).getEmployeeByCode(code)
+			    ).withSelfRel(),
+			    WebMvcLinkBuilder.linkTo(
+			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
+			    			.createEmployee(employee))
+			    .withRel("createEmployee"),
+			    WebMvcLinkBuilder.linkTo(
+			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
+			    			.updateEmployee(employee))
+			    .withRel("updateEmployee"),
+			    WebMvcLinkBuilder.linkTo(
+			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
+			    			.deleteEmployee(employee.getId()))
+			    .withRel("deleteLicense"));
+		return ResponseEntity.ok(employeeRest);
+	}
 
 	@PostMapping
 	public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {

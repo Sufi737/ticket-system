@@ -19,11 +19,17 @@ public class EmployeeService {
 		return employee;
 	}
 	
+	public Optional<Employee> getEmployeeByCode(String code) {
+		Optional<Employee> employee = employeeRepository.findByCode(code);
+		return employee;
+	}
+	
 	public Employee createEmployee(Employee employee) {
-		Employee existingEmp = employeeRepository.findByEmail(employee.getEmail());
-		if (existingEmp != null) {
+		Optional<Employee> existingEmp = employeeRepository.findByEmail(employee.getEmail());
+		if (existingEmp.isPresent()) {
 			return null;
 		}
+		employee = existingEmp.get();
 		employee = employeeRepository.save(employee);
 		return employee;
 	}
