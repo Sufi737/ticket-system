@@ -10,3 +10,32 @@ spring:
       
 ticket:
   prefix: INC
+  
+resilience4j.circuitbreaker:
+  instances:
+    ticketService:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 3
+      ringBufferSizeInHalfOpenState: 3
+      waitDurationInOpenState: 10s
+      failureRateThreshold: 5
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.io.IOException
+        - java.util.concurrent.TimeoutException
+        - org.springframework.web.client.ResourceAccessException
+        
+resilience4j.bulkhead:
+  instances:
+    bulkheadTicketService:
+      maxWaitDuration: 10ms
+      maxConcurrentCalls: 20
+
+resilience4j.thread-pool-bulkhead:
+  instances:
+    bulkheadTicketService:
+      maxThreadPoolSize: 1
+      coreThreadPoolSize: 1
+      queueCapacity: 1
+      keepAliveDuration: 20ms
+      

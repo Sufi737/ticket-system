@@ -21,6 +21,9 @@ import com.system.ticket.entities.TicketRestRequest;
 import com.system.ticket.services.StatusService;
 import com.system.ticket.services.TicketService;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @RestController
 @RequestMapping("/ticket")
 public class TicketController {
@@ -34,6 +37,8 @@ public class TicketController {
 	@Autowired
 	private EmployeeFeignClient employeeFeignClient;
 	
+	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
+	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@GetMapping("/{code}")
 	public ResponseEntity<?> getTicket(@PathVariable String code) {
 		Optional<Ticket> ticketOptional = ticketService.getTicketByCode(code);
@@ -59,6 +64,8 @@ public class TicketController {
 		return ResponseEntity.ok(ticketResponse);
 	}
 	
+	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
+	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@PostMapping
 	public ResponseEntity<?> createTicket(@RequestBody TicketRestRequest ticketRequest) {
 		Optional<Status> status = ticketService.getStatusByStatusCode(ticketRequest.getStatusCode());
@@ -77,6 +84,8 @@ public class TicketController {
 		return ResponseEntity.ok(ticket);
 	}
 	
+	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
+	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@PutMapping
 	public ResponseEntity<?> updateTicket(@RequestBody Ticket ticket) {
 		if (ticket.getTicketCode() == null) {
@@ -89,9 +98,15 @@ public class TicketController {
 		return ResponseEntity.ok(updatedticket);
 	}
 	
+	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
+	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@DeleteMapping("/{ticketCode}")
 	public ResponseEntity<String> deleteTicket(@PathVariable String ticketCode) {
 		ticketService.deleteTicket(ticketCode);
 		return ResponseEntity.ok("Ticket deleted successfully");
+	}
+	
+	public ResponseEntity<?> fallbackGetTicket(String code, Throwable t) {
+		return ResponseEntity.ok("Sorry. This service is not available at the moment.");
 	}
 }
