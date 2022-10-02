@@ -29,7 +29,6 @@ public class EmployeeService {
 		if (existingEmp.isPresent()) {
 			return null;
 		}
-		employee = existingEmp.get();
 		employee = employeeRepository.save(employee);
 		return employee;
 	}
