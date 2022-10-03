@@ -5,7 +5,7 @@ spring:
     active: dev
   cloud:
     config:
-      uri: http://localhost:8071
+      uri: http://configserver:8071
       
       
 ticket:
@@ -15,10 +15,10 @@ resilience4j.circuitbreaker:
   instances:
     ticketService:
       registerHealthIndicator: true
-      ringBufferSizeInClosedState: 3
+      ringBufferSizeInClosedState: 10
       ringBufferSizeInHalfOpenState: 3
       waitDurationInOpenState: 10s
-      failureRateThreshold: 5
+      failureRateThreshold: 50
       recordExceptions:
         - org.springframework.web.client.HttpServerErrorException
         - java.io.IOException

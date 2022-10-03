@@ -64,8 +64,8 @@ public class TicketController {
 		return ResponseEntity.ok(ticketResponse);
 	}
 	
-	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
-	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
+	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackCreateTicket")
+	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackCreateTicket")
 	@PostMapping
 	public ResponseEntity<?> createTicket(@RequestBody TicketRestRequest ticketRequest) {
 		Optional<Status> status = ticketService.getStatusByStatusCode(ticketRequest.getStatusCode());
@@ -84,8 +84,8 @@ public class TicketController {
 		return ResponseEntity.ok(ticket);
 	}
 	
-	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
-	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
+	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackUpdateTicket")
+	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackUpdateTicket")
 	@PutMapping
 	public ResponseEntity<?> updateTicket(@RequestBody Ticket ticket) {
 		if (ticket.getTicketCode() == null) {
@@ -107,6 +107,14 @@ public class TicketController {
 	}
 	
 	public ResponseEntity<?> fallbackGetTicket(String code, Throwable t) {
+		return ResponseEntity.ok("Sorry. This service is not available at the moment.");
+	}
+	
+	public ResponseEntity<?> fallbackCreateTicket(TicketRestRequest ticketRequest, Throwable t) {
+		return ResponseEntity.ok("Sorry. This service is not available at the moment.");
+	}
+	
+	public ResponseEntity<?> fallbackUpdateTicket(Ticket ticketRequest, Throwable t) {
 		return ResponseEntity.ok("Sorry. This service is not available at the moment.");
 	}
 }

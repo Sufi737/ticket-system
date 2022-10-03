@@ -1,17 +1,35 @@
 version: "3.7"
 
 services:
-
-  db:
+  employee-db:
     image: mysql:8.0
     cap_add:
       - SYS_NICE
     restart: always
     environment:
       - MYSQL_DATABASE=employee
-      - MYSQL_ROOT_PASSWORD=root 
+      - MYSQL_ROOT_PASSWORD=Sufyan@123
     ports:
       - "3306:3306" 
+    volumes:
+      - "./sql-scripts:/docker-entrypoint-initdb.d" 
+    networks:
+      - service-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      
+  ticket-db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=ticket
+      - MYSQL_ROOT_PASSWORD=Sufyan@123
+    ports:
+      - "3307:3307" 
     volumes:
       - "./sql-scripts:/docker-entrypoint-initdb.d" 
     networks:
@@ -27,11 +45,21 @@ services:
       - "8071:8071"
     networks:
       - service-network
-
+        
+  eurekaserver:
+    image: eureka/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    depends_on:
+      configserver:
+        condition: service_started  
+    networks:
+      - service-network
+      
   employee-service:
     image: employee/employee:0.0.2-SNAPSHOT
     ports:
-      - "8080:8080"
+      - "8180:8180"
     environment:
       PROFILE: "dev"
       CONFIGSERVER_URI: "http://configserver:8071"
@@ -40,10 +68,46 @@ services:
     networks:
       - service-network
     depends_on: 
-      db:
+      employee-db:
         condition: service_healthy
       configserver:
         condition: service_started
+        
+  ticket-service:
+    image: ticket/ticket:0.0.1-SNAPSHOT
+    ports:
+      - "8081:8081"
+    environment:
+      PROFILE: "dev"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      CONFIGSERVER_PORT: "8071"
+      DATABASESERVER_PORT: "3306"
+    networks:
+      - service-network
+    depends_on: 
+      ticket-db:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+
+  gatewayserver:
+    image: gateway/gatewayserver:0.0.1-SNAPSHOT
+    ports:
+      - "8072:8072"
+    environment:
+      PROFILE: "default"
+      SERVER_PORT: "8072"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      EUREKASERVER_URI: "http://eurekaserver:8070/eureka/"
+      EUREKASERVER_PORT: "8070"
+      CONFIGSERVER_PORT: "8071"
+    depends_on:
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      - service-network
       
 networks:
   service-network:
