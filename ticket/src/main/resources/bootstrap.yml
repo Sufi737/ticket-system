@@ -6,6 +6,8 @@ spring:
   cloud:
     config:
       uri: http://configserver:8071
+  main:
+    allow-circular-references: true
       
       
 ticket:
