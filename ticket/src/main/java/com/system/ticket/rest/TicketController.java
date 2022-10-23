@@ -73,6 +73,7 @@ public class TicketController {
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackCreateTicket")
 	@PostMapping
 	public ResponseEntity<?> createTicket(@RequestBody TicketRestRequest ticketRequest) {
+		logger.debug("CREATE ticket request");
 		Optional<Status> status = ticketService.getStatusByStatusCode(ticketRequest.getStatusCode());
 		if (status.isEmpty()) {
 			return ResponseEntity.badRequest().body("Status with given code not found");
@@ -93,6 +94,7 @@ public class TicketController {
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackUpdateTicket")
 	@PutMapping
 	public ResponseEntity<?> updateTicket(@RequestBody Ticket ticket) {
+		logger.debug("UPDATE ticket request");
 		if (ticket.getTicketCode() == null) {
 			return ResponseEntity.badRequest().body("Please provide ticket ID");
 		}
@@ -107,6 +109,7 @@ public class TicketController {
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@DeleteMapping("/{ticketCode}")
 	public ResponseEntity<String> deleteTicket(@PathVariable String ticketCode) {
+		logger.debug("DELETE ticket request");
 		ticketService.deleteTicket(ticketCode);
 		return ResponseEntity.ok("Ticket deleted successfully");
 	}

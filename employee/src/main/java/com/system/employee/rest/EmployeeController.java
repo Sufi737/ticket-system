@@ -2,6 +2,8 @@ package com.system.employee.rest;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import com.system.employee.entities.Role;
 import com.system.employee.services.DepartmentService;
 import com.system.employee.services.EmployeeService;
 import com.system.employee.services.RoleService;
+import com.system.ticket.rest.TicketController;
 
 @RestController
 @RequestMapping("/employee")
@@ -35,8 +38,11 @@ public class EmployeeController {
 	@Autowired
 	private RoleService roleService;
 	
+	Logger logger = LoggerFactory.getLogger(EmployeeController.class);
+	
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getEmployee(@PathVariable Integer id) {
+		logger.debug("GET employee request. Id: "+id);
 		Optional<Employee> employeeOptional = employeeService.getEmployee(id);
 		if (!employeeOptional.isPresent()) {
 			return ResponseEntity.ok("Employee with give id not found");
@@ -88,6 +94,7 @@ public class EmployeeController {
 	
 	@GetMapping("/code/{code}")
 	public ResponseEntity<?> getEmployeeByCode(@PathVariable String code) {
+		logger.debug("GET employee request. Code: "+code);
 		Optional<Employee> employeeOptional = employeeService.getEmployeeByCode(code);
 		if (!employeeOptional.isPresent()) {
 			return ResponseEntity.ok("Employee with give code not found");
@@ -139,6 +146,7 @@ public class EmployeeController {
 
 	@PostMapping
 	public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
+		logger.debug("CREATE employee request");
 		employee = employeeService.createEmployee(employee);
 		if (employee == null) {
 			return ResponseEntity.badRequest().body("Employee with given email already exists");
@@ -148,6 +156,7 @@ public class EmployeeController {
 	
 	@PutMapping
 	public ResponseEntity<?> updateEmployee(@RequestBody Employee employee) {
+		logger.debug("UPDATE employee request");
 		if (employee.getId() == null) {
 			return ResponseEntity.badRequest().body("Please provide employee id");
 		}
