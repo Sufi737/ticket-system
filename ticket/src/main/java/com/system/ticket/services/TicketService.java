@@ -27,7 +27,11 @@ public class TicketService {
 	}
 	
 	public Optional<Ticket> getTicketByCode(String ticketCode) {
-		return ticketRepository.findByTicketCode(ticketCode);
+		Optional<Ticket> ticketOpt = ticketRepository.findByTicketCode(ticketCode);
+		if (ticketOpt.isPresent()) {
+			Ticket ticket = ticketOpt.get();
+		}
+		return ticketOpt;
 	}
 	
 	public Optional<Status> getStatusByStatusCode(String statusCode) {
