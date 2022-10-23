@@ -2,6 +2,8 @@ package com.system.ticket.rest;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,10 +39,13 @@ public class TicketController {
 	@Autowired
 	private EmployeeFeignClient employeeFeignClient;
 	
+	Logger logger = LoggerFactory.getLogger(TicketController.class);
+	
 	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@GetMapping("/{code}")
 	public ResponseEntity<?> getTicket(@PathVariable String code) {
+		logger.debug("GET ticket request. Code: "+code);
 		Optional<Ticket> ticketOptional = ticketService.getTicketByCode(code);
 		if (!ticketOptional.isPresent()) {
 			return ResponseEntity.ok("Ticket with given id not found");
