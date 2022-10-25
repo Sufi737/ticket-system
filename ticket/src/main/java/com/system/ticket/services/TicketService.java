@@ -10,6 +10,9 @@ import com.system.ticket.entities.Status;
 import com.system.ticket.entities.Ticket;
 import com.system.ticket.repositories.TicketRepository;
 
+import brave.ScopedSpan;
+import brave.Tracer;
+
 @Service
 public class TicketService {
 
@@ -22,16 +25,27 @@ public class TicketService {
 	@Value("${ticket.prefix}")
 	private String ticketCodePrefix;
 	
+	@Autowired
+	Tracer tracer;
+	
 	public String createTicketCode(Integer ticketId) {
 		return ticketCodePrefix+ticketId;
 	}
 	
 	public Optional<Ticket> getTicketByCode(String ticketCode) {
-		Optional<Ticket> ticketOpt = ticketRepository.findByTicketCode(ticketCode);
-		if (ticketOpt.isPresent()) {
-			Ticket ticket = ticketOpt.get();
+		ScopedSpan ticketGetSpan = tracer.startScopedSpan("getTicketDatabaseCall");
+		try {
+			Optional<Ticket> ticketOpt = ticketRepository.findByTicketCode(ticketCode);
+			if (ticketOpt.isPresent()) {
+				Ticket ticket = ticketOpt.get();
+			}
+			return ticketOpt;
+		} finally {
+			ticketGetSpan.tag("peer.service", "mysql");
+			ticketGetSpan.annotate("Client received");
+			ticketGetSpan.finish();
 		}
-		return ticketOpt;
+		
 	}
 	
 	public Optional<Status> getStatusByStatusCode(String statusCode) {

@@ -8,20 +8,42 @@ import org.springframework.stereotype.Service;
 import com.system.employee.entities.Employee;
 import com.system.employee.repositories.EmployeeRepository;
 
+import brave.ScopedSpan;
+import brave.Tracer;
+
 @Service
 public class EmployeeService {
 	
 	@Autowired
 	private EmployeeRepository employeeRepository;
+	
+	@Autowired
+	Tracer tracer;
 
 	public Optional<Employee> getEmployee(Integer id) {
-		Optional<Employee> employee = employeeRepository.findById(id);
-		return employee;
+		ScopedSpan empGetSpan = tracer.startScopedSpan("getEmployeeDatabaseCall");
+		try {
+			Optional<Employee> employee = employeeRepository.findById(id);
+			return employee;
+		} finally {
+			empGetSpan.tag("peer.service", "mysql");
+			empGetSpan.annotate("Client received");
+			empGetSpan.finish();
+		}
+		
 	}
 	
 	public Optional<Employee> getEmployeeByCode(String code) {
-		Optional<Employee> employee = employeeRepository.findByCode(code);
-		return employee;
+		ScopedSpan empGetSpan = tracer.startScopedSpan("getEmployeeDatabaseCall");
+		try {
+			Optional<Employee> employee = employeeRepository.findByCode(code);
+			return employee;
+		} finally {
+			empGetSpan.tag("peer.service", "mysql");
+			empGetSpan.annotate("Client received");
+			empGetSpan.finish();
+		}
+		
 	}
 	
 	public Employee createEmployee(Employee employee) {

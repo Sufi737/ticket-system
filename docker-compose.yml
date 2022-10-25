@@ -171,6 +171,19 @@ services:
     networks:
       - service-network
       
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    depends_on:
+      - elasticsearch
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - "ES_HOSTS=elasticsearch:9200"
+    ports:
+      - "9411:9411"
+    networks:
+      - service-network
+      
 networks:
   service-network:
     
