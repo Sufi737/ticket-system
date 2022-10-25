@@ -2,6 +2,8 @@ package com.system.ticket.services;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,55 +30,99 @@ public class TicketService {
 	@Autowired
 	Tracer tracer;
 	
+	Logger logger = LoggerFactory.getLogger(TicketService.class);
+	
 	public String createTicketCode(Integer ticketId) {
 		return ticketCodePrefix+ticketId;
 	}
 	
 	public Optional<Ticket> getTicketByCode(String ticketCode) {
-		ScopedSpan ticketGetSpan = tracer.startScopedSpan("getTicketDatabaseCall");
+		ScopedSpan ticketSpan = tracer.startScopedSpan("getTicketDatabaseCall");
 		try {
 			Optional<Ticket> ticketOpt = ticketRepository.findByTicketCode(ticketCode);
 			if (ticketOpt.isPresent()) {
 				Ticket ticket = ticketOpt.get();
 			}
 			return ticketOpt;
+		} catch (Exception e) {
+			logger.debug("Exception getting ticket by code: "+e.getMessage());
+			logger.debug("Exception trace: "+e.getStackTrace());
 		} finally {
-			ticketGetSpan.tag("peer.service", "mysql");
-			ticketGetSpan.annotate("Client received");
-			ticketGetSpan.finish();
+			ticketSpan.tag("peer.service", "mysql");
+			ticketSpan.annotate("Client received");
+			ticketSpan.finish();
 		}
-		
+		return null;
 	}
 	
 	public Optional<Status> getStatusByStatusCode(String statusCode) {
-		Optional<Status> status = statusService.getStatusByCode(statusCode);
-		if (status.isEmpty()) {
-			return null;
+		ScopedSpan statusGetSpan = tracer.startScopedSpan("getStatusDatabaseCall");
+		try {
+			Optional<Status> status = statusService.getStatusByCode(statusCode);
+			if (status.isEmpty()) {
+				return null;
+			}
+			return status;
+		} catch (Exception e) {
+			logger.debug("Exception getting status by code: "+e.getMessage());
+			logger.debug("Exception trace: "+e.getStackTrace());
+		} finally {
+			statusGetSpan.tag("peer.service", "mysql");
+			statusGetSpan.annotate("Client received");
+			statusGetSpan.finish();
 		}
-		return status;
+		return null;
+		
 	}
 	
 	public Ticket createTicket(Ticket ticket) {
-		ticket = ticketRepository.save(ticket);
-		ticket.setTicketCode(this.createTicketCode(ticket.getId()));
-		ticket = ticketRepository.save(ticket);
-		return ticket;
+		ScopedSpan ticketSpan = tracer.startScopedSpan("createTicketDatabaseCall");
+		try {
+			ticket = ticketRepository.save(ticket);
+			ticket.setTicketCode(this.createTicketCode(ticket.getId()));
+			ticket = ticketRepository.save(ticket);
+			return ticket;
+		} catch (Exception e) {
+			logger.debug("Exception creating ticket: "+e.getMessage());
+			logger.debug("Exception trace: "+e.getStackTrace());
+		} finally {
+			ticketSpan.tag("peer.service", "mysql");
+			ticketSpan.annotate("Client received");
+			ticketSpan.finish();
+		}
+		return null;
 	}
 	
 	public Ticket updateTicket(Ticket ticket) {
-		Optional<Ticket> existingTicket = ticketRepository.findById(ticket.getId());
-		if (existingTicket.isPresent()) {
-			ticket = ticketRepository.save(ticket);
-			return ticket;
+		ScopedSpan ticketSpan = tracer.startScopedSpan("updateTicketDatabaseCall");
+		try {
+			Optional<Ticket> existingTicket = ticketRepository.findById(ticket.getId());
+			if (existingTicket.isPresent()) {
+				ticket = ticketRepository.save(ticket);
+				return ticket;
+			}
+		} catch (Exception e) {
+			logger.debug("Exception updating ticket: "+e.getMessage());
+			logger.debug("Exception trace: "+e.getStackTrace());
+		} finally {
+			ticketSpan.tag("peer.service", "mysql");
+			ticketSpan.annotate("Client received");
+			ticketSpan.finish();
 		}
 		return null;
 	}
 	
 	public void deleteTicket(String code) {
+		ScopedSpan ticketSpan = tracer.startScopedSpan("deleteTicketDatabaseCall");
 		try {
 			ticketRepository.deleteByTicketCode(code);
 		} catch (Exception e) {
-			//log exception
+			logger.debug("Exception deleting ticket: "+e.getMessage());
+			logger.debug("Exception trace: "+e.getStackTrace());
+		} finally {
+			ticketSpan.tag("peer.service", "mysql");
+			ticketSpan.annotate("Client received");
+			ticketSpan.finish();
 		}
 	}
 }
