@@ -36,8 +36,7 @@ ALTER TABLE employee
 INSERT INTO roles(role_name) 
     values 
         ('EMPLOYEE'),
-        ('ADMIN'),
-        ('TECH_SUPPORT');
+        ('ADMIN');
 
 INSERT INTO department(department_name)
     values ('CMS'), ('Tech'), ('Operations'), ('HR');
