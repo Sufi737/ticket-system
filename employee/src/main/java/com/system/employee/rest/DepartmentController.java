@@ -2,6 +2,8 @@ package com.system.employee.rest;
 
 import java.util.Optional;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import com.system.employee.services.DepartmentService;
 
 @RestController
 @RequestMapping("/department")
+@RolesAllowed("ADMIN")
 public class DepartmentController {
 
 	@Autowired
