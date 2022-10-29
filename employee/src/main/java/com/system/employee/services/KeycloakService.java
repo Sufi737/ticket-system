@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,8 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.system.employee.entities.KeycloakRole;
-import com.system.employee.entities.KeycloakUser;
+import com.system.employee.entities.keycloak.KeycloakClient;
+import com.system.employee.entities.keycloak.KeycloakRole;
+import com.system.employee.entities.keycloak.KeycloakUser;
 
 @Service
 public class KeycloakService {
@@ -65,38 +65,50 @@ public class KeycloakService {
 		return response[0];
 	}
 	
-	private KeycloakRole getRoleFromRoleName(String token, String name) {
+	private KeycloakRole getRoleFromRoleName(String token, String name, String containerId) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", token);
 		HttpEntity<?> request = new HttpEntity<>(headers);
 		return restTemplate.exchange(
-				serverUrl+"admin/realms/"+realm+"/roles/"+name, 
+				serverUrl+"admin/realms/"+realm+"/clients/"+containerId+"/roles/"+name, 
 				HttpMethod.GET, 
 				request,
 				KeycloakRole.class).getBody();
 	}
 	
-	private void assignRoleToUser(String token, String userId, String roleId, String roleName) {
+	private KeycloakClient getClientByName(String token, String name) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", token);
-		List<Map<String, String>> requestBody = new ArrayList<>();
-		Map<String, String> map = new HashMap<>();
+		HttpEntity<?> request = new HttpEntity<>(headers);
+		KeycloakClient[] client = restTemplate.exchange(
+				serverUrl+"admin/realms/"+realm+"/clients?clientId="+name, 
+				HttpMethod.GET, 
+				request,
+				KeycloakClient[].class).getBody();
+		return client[0];
+	}
+	
+	private void assignRoleToUser(String token, String userId, String roleId, String roleName, String containerId) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", token);
+		List<Map<String, Object>> requestBody = new ArrayList<>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("id", roleId);
 		map.put("name", roleName);
+		map.put("composite", false);
+		map.put("clientRole", true);
+		map.put("containerId", containerId);
 		requestBody.add(map);
 		HttpEntity<?> request = new HttpEntity<>(requestBody, headers);
 		ResponseEntity<Void> response = restTemplate.exchange(
-				serverUrl+"admin/realms/"+realm+"/users/"+userId+"/role-mappings/realm", 
+				serverUrl+"admin/realms/"+realm+"/users/"+userId+"/role-mappings/clients/"+containerId, 
 				HttpMethod.POST, 
 				request, 
 				Void.class);
-		logger.debug("Role assignment response status: "+response.getStatusCodeValue());
-		logger.debug("Role assignment response body: "+response.getBody());
 	}
 
 	public void addCredentials(String authToken, String username, String firstname, String lastname, String password) {
 		try {
-			logger.debug("Sending a token request to: "+serverUrl+"admin/realms/"+realm+"/users");
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", authToken);
 			UserRepresentation user = this.getUser(username, firstname, lastname);
@@ -111,12 +123,10 @@ public class KeycloakService {
 					request, 
 					ResponseEntity.class);
 			if (response.getStatusCode() == HttpStatus.CREATED) {
-				logger.debug("Keycloak user created successfully with username: "+username);
 				KeycloakUser createdUser = this.getUserFromUsername(authToken, username);
-				logger.debug("Keycloak user id fetched successfully: "+createdUser.getId());
-				KeycloakRole role = this.getRoleFromRoleName(authToken, "USER");
-				logger.debug("Keycloak role fetched successfully: "+role.getId());
-				this.assignRoleToUser(authToken, createdUser.getId(), role.getId(), "USER");
+				KeycloakClient client = this.getClientByName(authToken, clientId);
+				KeycloakRole role = this.getRoleFromRoleName(authToken, "USER", client.getId());
+				this.assignRoleToUser(authToken, createdUser.getId(), role.getId(), "USER", client.getId());
 			}
 		} catch (Exception e) {
 			logger.debug("Exception adding credentials for user in Keycloak service: "+e.getMessage());

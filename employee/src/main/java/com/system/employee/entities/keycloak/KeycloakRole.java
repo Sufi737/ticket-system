@@ -1,4 +1,4 @@
-package com.system.employee.entities;
+package com.system.employee.entities.keycloak;
 
 import lombok.Data;
 

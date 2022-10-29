@@ -1,6 +1,7 @@
-package com.system.employee.entities;
+package com.system.employee.entities.keycloak;
 
 import java.util.List;
+
 import lombok.Data;
 
 @Data

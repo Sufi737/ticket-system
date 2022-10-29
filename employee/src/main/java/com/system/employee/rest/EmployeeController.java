@@ -2,6 +2,8 @@ package com.system.employee.rest;
 
 import java.util.Optional;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class EmployeeController {
 	Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 	
 	@GetMapping("/{id}")
+	@RolesAllowed({"ADMIN","USER"})
 	public ResponseEntity<?> getEmployee(@RequestHeader (name="Authorization") String token, @PathVariable Integer id) {
 		logger.debug("GET employee request. Id: "+id);
 		Optional<Employee> employeeOptional = employeeService.getEmployee(id);
@@ -97,6 +100,7 @@ public class EmployeeController {
 	}
 	
 	@GetMapping("/code/{code}")
+	@RolesAllowed({"ADMIN","USER"})
 	public ResponseEntity<?> getEmployeeByCode(@RequestHeader (name="Authorization") String token, @PathVariable String code) {
 		logger.debug("GET employee request. Code: "+code);
 		Optional<Employee> employeeOptional = employeeService.getEmployeeByCode(code);
@@ -149,6 +153,7 @@ public class EmployeeController {
 	}
 
 	@PostMapping
+	@RolesAllowed({"ADMIN"})
 	public ResponseEntity<?> createEmployee(@RequestHeader (name="Authorization") String token, @RequestBody Employee employee) {
 		logger.debug("CREATE employee request");
 		logger.debug("Keycloak access token: "+token);
@@ -162,6 +167,7 @@ public class EmployeeController {
 	}
 	
 	@PutMapping
+	@RolesAllowed({"ADMIN"})
 	public ResponseEntity<?> updateEmployee(@RequestHeader (name="Authorization") String token, @RequestBody Employee employee) {
 		logger.debug("UPDATE employee request");
 		if (employee.getId() == null) {
@@ -175,6 +181,7 @@ public class EmployeeController {
 	}
 	
 	@DeleteMapping("/{id}")
+	@RolesAllowed({"ADMIN"})
 	public ResponseEntity<String> deleteEmployee(@RequestHeader (name="Authorization") String token, @PathVariable Integer id) {
 		employeeService.deleteEmployee(id);
 		return ResponseEntity.ok("Employee deleted successfully");
