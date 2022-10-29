@@ -55,7 +55,7 @@ public class KeycloakService {
 				request, 
 				ResponseEntity.class);
 		if (response.getStatusCode() == HttpStatus.CREATED) {
-			logger.debug("Keycloak user created successfully with username"+username);
+			logger.debug("Keycloak user created successfully with username: "+username);
 		}
 	}
 }

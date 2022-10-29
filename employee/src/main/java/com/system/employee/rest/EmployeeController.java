@@ -157,7 +157,7 @@ public class EmployeeController {
 			return ResponseEntity.badRequest().body("Employee with given email already exists");
 		}
 		//add employee credentials in Keycloak
-		keycloakService.addCredentials(token, employee.getEmail(), employee.getFirstname(), employee.getLastname(),"Sufyan@12345");
+		keycloakService.addCredentials(token, employee.getEmail(), employee.getFirstname(), employee.getLastname(), employee.getPassword());
 		return ResponseEntity.ok(employee);
 	}
 	
