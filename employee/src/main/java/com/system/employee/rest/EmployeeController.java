@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,8 +23,8 @@ import com.system.employee.entities.EmployeeResponseEntity;
 import com.system.employee.entities.Role;
 import com.system.employee.services.DepartmentService;
 import com.system.employee.services.EmployeeService;
+import com.system.employee.services.KeycloakService;
 import com.system.employee.services.RoleService;
-import com.system.ticket.rest.TicketController;
 
 @RestController
 @RequestMapping("/employee")
@@ -38,10 +39,13 @@ public class EmployeeController {
 	@Autowired
 	private RoleService roleService;
 	
+	@Autowired
+	private KeycloakService keycloakService;
+	
 	Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getEmployee(@PathVariable Integer id) {
+	public ResponseEntity<?> getEmployee(@RequestHeader (name="Authorization") String token, @PathVariable Integer id) {
 		logger.debug("GET employee request. Id: "+id);
 		Optional<Employee> employeeOptional = employeeService.getEmployee(id);
 		if (!employeeOptional.isPresent()) {
@@ -75,25 +79,25 @@ public class EmployeeController {
 				);
 		employeeRest.add(
 			    WebMvcLinkBuilder.linkTo(
-			    		WebMvcLinkBuilder.methodOn(EmployeeController.class).getEmployee(id)
+			    		WebMvcLinkBuilder.methodOn(EmployeeController.class).getEmployee(token, id)
 			    ).withSelfRel(),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
-			    			.createEmployee(employee))
+			    			.createEmployee(token, employee))
 			    .withRel("createEmployee"),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
-			    			.updateEmployee(employee))
+			    			.updateEmployee(token, employee))
 			    .withRel("updateEmployee"),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
-			    			.deleteEmployee(id))
+			    			.deleteEmployee(token, id))
 			    .withRel("deleteLicense"));
 		return ResponseEntity.ok(employeeRest);
 	}
 	
 	@GetMapping("/code/{code}")
-	public ResponseEntity<?> getEmployeeByCode(@PathVariable String code) {
+	public ResponseEntity<?> getEmployeeByCode(@RequestHeader (name="Authorization") String token, @PathVariable String code) {
 		logger.debug("GET employee request. Code: "+code);
 		Optional<Employee> employeeOptional = employeeService.getEmployeeByCode(code);
 		if (!employeeOptional.isPresent()) {
@@ -127,35 +131,38 @@ public class EmployeeController {
 				);
 		employeeRest.add(
 			    WebMvcLinkBuilder.linkTo(
-			    		WebMvcLinkBuilder.methodOn(EmployeeController.class).getEmployeeByCode(code)
+			    		WebMvcLinkBuilder.methodOn(EmployeeController.class).getEmployeeByCode(token, code)
 			    ).withSelfRel(),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
-			    			.createEmployee(employee))
+			    			.createEmployee(token, employee))
 			    .withRel("createEmployee"),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
-			    			.updateEmployee(employee))
+			    			.updateEmployee(token, employee))
 			    .withRel("updateEmployee"),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(EmployeeController.class)
-			    			.deleteEmployee(employee.getId()))
+			    			.deleteEmployee(token, employee.getId()))
 			    .withRel("deleteLicense"));
 		return ResponseEntity.ok(employeeRest);
 	}
 
 	@PostMapping
-	public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
+	public ResponseEntity<?> createEmployee(@RequestHeader (name="Authorization") String token, @RequestBody Employee employee) {
 		logger.debug("CREATE employee request");
+		logger.debug("Keycloak access token: "+token);
 		employee = employeeService.createEmployee(employee);
 		if (employee == null) {
 			return ResponseEntity.badRequest().body("Employee with given email already exists");
 		}
+		//add employee credentials in Keycloak
+		keycloakService.addCredentials(token, employee.getEmail(), employee.getFirstname(), employee.getLastname(),"Sufyan@12345");
 		return ResponseEntity.ok(employee);
 	}
 	
 	@PutMapping
-	public ResponseEntity<?> updateEmployee(@RequestBody Employee employee) {
+	public ResponseEntity<?> updateEmployee(@RequestHeader (name="Authorization") String token, @RequestBody Employee employee) {
 		logger.debug("UPDATE employee request");
 		if (employee.getId() == null) {
 			return ResponseEntity.badRequest().body("Please provide employee id");
@@ -168,7 +175,7 @@ public class EmployeeController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteEmployee(@PathVariable Integer id) {
+	public ResponseEntity<String> deleteEmployee(@RequestHeader (name="Authorization") String token, @PathVariable Integer id) {
 		employeeService.deleteEmployee(id);
 		return ResponseEntity.ok("Employee deleted successfully");
 	}
