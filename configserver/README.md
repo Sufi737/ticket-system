@@ -1,7 +1,7 @@
 ## Configuration Service
 
 ### Overview
-This is a service which plays the role of configuration erver. The goal of a configuration server is to keep the configuration of the microservices separate from the service codebase. This eliminates the need to re-deploy our microservices when the configuration is changed.
+This is a service which plays the role of configuration server. The goal of a configuration server is to keep the configuration of the microservices separate from the service codebase. This eliminates the need to re-deploy our microservices when the configuration is changed.
 
 ### Flow:
 When a microservice container is fired up, it reads its startup configuration data by making a call to the configuration server.
