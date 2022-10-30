@@ -2,6 +2,8 @@ package com.system.ticket.rest;
 
 import java.util.Optional;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +26,7 @@ public class StatusController {
 	private StatusService statusService;
 	
 	@GetMapping("/{code}")
+	@RolesAllowed("ADMIN")
 	public ResponseEntity<?> getStatus(@PathVariable String code) {
 		Optional<Status> statusOptional = statusService.getStatusByCode(code);
 		if (!statusOptional.isPresent()) {
@@ -34,12 +37,17 @@ public class StatusController {
 	}
 	
 	@PostMapping
+	@RolesAllowed("ADMIN")
 	public ResponseEntity<?> createStatus(@RequestBody Status status) {
 		status = statusService.createStatus(status);
+		if (status == null) {
+			return ResponseEntity.ok("Status with given code already exists");
+		}
 		return ResponseEntity.ok(status);
 	}
 	
 	@PutMapping
+	@RolesAllowed("ADMIN")
 	public ResponseEntity<?> updateStatus(@RequestBody Status status) {
 		if (status.getStatusCode() == null) {
 			return ResponseEntity.badRequest().body("Please provide status code");
@@ -52,6 +60,7 @@ public class StatusController {
 	}
 	
 	@DeleteMapping("/{statusCode}")
+	@RolesAllowed("ADMIN")
 	public ResponseEntity<String> deleteStatus(@PathVariable String statusCode) {
 		statusService.deleteStatus(statusCode);
 		return ResponseEntity.ok("Status deleted successfully");

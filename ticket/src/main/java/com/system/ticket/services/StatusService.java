@@ -59,6 +59,7 @@ public class StatusService {
 		ScopedSpan statusSpan = tracer.startScopedSpan("createStatusDatabaseCall");
 		try {
 			Optional<Status> existingStatus = statusRepository.findByStatusCode(status.getStatusCode());
+			logger.debug("Status service existing status present:  "+existingStatus.isPresent());
 			if (existingStatus.isPresent()) {
 				return null;
 			}

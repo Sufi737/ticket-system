@@ -2,6 +2,8 @@ package com.system.ticket.rest;
 
 import java.util.Optional;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,7 @@ public class TicketController {
 	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@GetMapping("/{code}")
+	@RolesAllowed({"USER", "ADMIN"})
 	public ResponseEntity<?> getTicket(@PathVariable String code) {
 		logger.debug("GET ticket request. Code: "+code);
 		Optional<Ticket> ticketOptional = ticketService.getTicketByCode(code);
@@ -72,6 +75,7 @@ public class TicketController {
 	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackCreateTicket")
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackCreateTicket")
 	@PostMapping
+	@RolesAllowed({"USER", "ADMIN"})
 	public ResponseEntity<?> createTicket(@RequestBody TicketRestRequest ticketRequest) {
 		logger.debug("CREATE ticket request");
 		Optional<Status> status = ticketService.getStatusByStatusCode(ticketRequest.getStatusCode());
@@ -93,6 +97,7 @@ public class TicketController {
 	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackUpdateTicket")
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackUpdateTicket")
 	@PutMapping
+	@RolesAllowed({"USER", "ADMIN"})
 	public ResponseEntity<?> updateTicket(@RequestBody Ticket ticket) {
 		logger.debug("UPDATE ticket request");
 		if (ticket.getTicketCode() == null) {
@@ -108,6 +113,7 @@ public class TicketController {
 	@CircuitBreaker(name="ticketService", fallbackMethod="fallbackGetTicket")
 	@Bulkhead(name="bulkheadTicketService", fallbackMethod="fallbackGetTicket")
 	@DeleteMapping("/{ticketCode}")
+	@RolesAllowed("ADMIN")
 	public ResponseEntity<String> deleteTicket(@PathVariable String ticketCode) {
 		logger.debug("DELETE ticket request");
 		ticketService.deleteTicket(ticketCode);
