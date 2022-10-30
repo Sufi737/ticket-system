@@ -55,6 +55,21 @@ AddRequestParameter
 PrefixPath - Adds a prefix to the HTTP request path 
 
 There are two types of filters: Pre and Post. Pre-filter works before the service is called and post is called later.
+
+We have added below configuration for gateway server in configuration file
+
+```
+spring.cloud.loadbalancer.ribbon.enabled=false
+spring.cloud.gateway.routes[0].id=employee
+spring.cloud.gateway.routes[0].uri=lb://employee
+spring.cloud.gateway.routes[0].predicates[0]=Path=/employee/**
+spring.cloud.gateway.routes[0].filters[0]=RewritePath=/employee/(?<path>.*), /$\{path}
+spring.cloud.gateway.routes[1].id=ticket
+spring.cloud.gateway.routes[1].uri=lb://ticket
+spring.cloud.gateway.routes[1].predicates[0]=Path=/ticket/**
+spring.cloud.gateway.routes[1].filters[0]=RewritePath=/ticket/(?<path>.*), /$\{path}
+spring.cloud.gateway.routes[1].filters[1]=RemoveRequestHeader= Cookie,Set-Cookie
+```
   
 ### Flow:
 1. Tracking filter (of gateway server) injects custom header params 
