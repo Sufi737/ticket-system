@@ -8,8 +8,6 @@ Ticket system is a proof of concept backend project which demonstrates the use o
 
 
 ## Available services
-Below are the available services 
-
 
 ### Ticket service
 Provides management of support tickets that will be created by an employee. The ticket will be assigned to an employee and can be moved from one status to another. To see the list of available endpoints and entities visit here: https://github.com/Sufi737/ticket-system/tree/master/ticket#readme
@@ -53,3 +51,32 @@ Eureka service is playing the role of providing service discovery here. Read thi
 ### Configuration Server:
 Configuration service seperates the configuration from the service codebase. This eliminates the need to restart our microservice instances when the configuration is changed. We only need to change the configuration in our configuration service and restart it.
 More details here: https://github.com/Sufi737/ticket-system/tree/master/configserver
+
+### Logging and tracing
+ELK (Elasticsearch, Logstash and Kibana) provides aggregation of logs to a single source. In a microservices architecture where there are calls made to multiple services for a single transaction, it becomes difficult to debug a transaction when something goes wrong as it might require logging in to multiple servers to check logs.
+
+Spring Cloud Sleuth solves this problem of tracing by adding below information in all the logs: 
+1. Service Name
+2. traceId: The traceId is associated for an entire transaction which involves multiple service calls
+3. spanId: A spanId is unique for each service call
+4. Send to Zipkin flag: A flag that tells whether the log will be sent to Zipkin 
+
+Example:
+
+```
+ticket-service_1    | 2022-10-23 12:31:51.802 DEBUG [ticket,b5e54467237dbc81,b5e54467237dbc81] 1 --- [nio-8081-exec-2] com.system.ticket.rest.TicketController  : GET ticket request. Code: INC1
+```
+
+With the tracing data added by Spring Cloud Sleuth, the following happens:
+
+1. All individual service instances send log data to Logstash
+2. Logstash sends the data to Elasticsearch so that it can be queried later. Elasticsearch indexes and stores the data in a searchable format.
+3. Kibana retrieves the data stored in Elasticsearch. In Kibana we can enter trace ID and see the the related log entries
+
+The ELK stack in this project is added as Docker containers (refer docker-compose.yml)
+
+### Zipkin
+
+In Zipkin we can visualize requests by filtering them by service names and span names
+We can also search a request using its trace id 
+Zipkin provides us a breakdown of a single request as multiple service calls. We can see which service call is taking how much time to check for bottlenecks.
