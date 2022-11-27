@@ -1,21 +1,21 @@
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Optional;
 
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -26,8 +26,8 @@ import com.system.ticket.entities.Status;
 import com.system.ticket.rest.StatusController;
 import com.system.ticket.services.StatusService;
 
-@RunWith(MockitoJUnitRunner.class)
-@SpringBootTest
+@SpringBootTest(classes={com.system.ticket.TicketApplication.class})
+@ExtendWith(SpringExtension.class)
 @AutoConfigureMockMvc
 public class StatusControllerTest {
 
@@ -46,11 +46,12 @@ public class StatusControllerTest {
 	public void setUp() {
 		//initMocks is deprecated
 		MockitoAnnotations.openMocks(this);
+		System.out.println("BeforeEach working!");
+		this.mockMvc = MockMvcBuilders.standaloneSetup(statusController).build();
 	}
 	
 	@Test
 	public void testGetStatusByCode() throws Exception {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(statusController).build();
 		Optional<Status> statusOptional = Optional.of(status);
 		Mockito.when(statusService.getStatusByCode("open")).thenReturn(statusOptional);
 		this.mockMvc.perform(get("/status/open")).andExpect(status().isOk());
@@ -58,8 +59,6 @@ public class StatusControllerTest {
 	
 	@Test
 	public void testCreateStatus() throws Exception {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(statusController).build();
-		
 		Gson gson = new Gson();
         String json = gson.toJson(status);
         
@@ -76,8 +75,6 @@ public class StatusControllerTest {
 	
 	@Test
 	public void testUpdateStatus() throws Exception {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(statusController).build();
-		
 		Gson gson = new Gson();
         String json = gson.toJson(status);
         
@@ -94,7 +91,6 @@ public class StatusControllerTest {
 	
 	@Test
 	public void testDeleteStatus() throws Exception {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(statusController).build();
 		this.mockMvc.perform(delete("/status/open")).andExpect(status().isOk());
 	}
 }
