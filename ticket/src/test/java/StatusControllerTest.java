@@ -46,7 +46,6 @@ public class StatusControllerTest {
 	public void setUp() {
 		//initMocks is deprecated
 		MockitoAnnotations.openMocks(this);
-		System.out.println("BeforeEach working!");
 		this.mockMvc = MockMvcBuilders.standaloneSetup(statusController).build();
 	}
 	
