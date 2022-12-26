@@ -2,10 +2,11 @@ package com.system.employee.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.hateoas.RepresentationModel;
 
 @Data
 @AllArgsConstructor
-public class EmployeeResponseEntity {
+public class EmployeeResponseEntity extends RepresentationModel<EmployeeResponseEntity> {
 
 	private Integer id;
 	private String firstname;
