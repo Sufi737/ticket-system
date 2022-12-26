@@ -1,66 +1,85 @@
 package com.system.employee.rest;
 
-import java.util.Optional;
-
-import javax.annotation.security.RolesAllowed;
-
+import com.system.employee.dto.DepartmentDTO;
+import com.system.employee.entities.Department;
+import com.system.employee.exceptions.RecordAlreadyExistsException;
+import com.system.employee.exceptions.RecordNotFoundException;
+import com.system.employee.services.DepartmentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.system.employee.entities.Department;
-import com.system.employee.services.DepartmentService;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/department")
-@RolesAllowed("ADMIN")
+//@RolesAllowed("ADMIN")
 public class DepartmentController {
 
 	@Autowired
 	private DepartmentService departmentService;
+
+	@Autowired
+	private ModelMapper modelMapper;
+
+	private DepartmentDTO getDepartmentDTO(Department department) {
+		return this.modelMapper.map(department, DepartmentDTO.class);
+	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getRole(@PathVariable Integer id) throws Exception{
+	public DepartmentDTO getDepartment(@PathVariable Integer id) throws Exception{
 		Optional<Department> departmentOptional = departmentService.getDepartment(id);
 		if (!departmentOptional.isPresent()) {
-			return ResponseEntity.ok("Department with given id not found");
+			throw new RecordNotFoundException();
 		}
 		Department dept = departmentOptional.get();
-		dept.add(
+		DepartmentDTO deptDTO = this.getDepartmentDTO(dept);
+		deptDTO.add(
 			    WebMvcLinkBuilder.linkTo(
-			    		WebMvcLinkBuilder.methodOn(DepartmentController.class).getRole(id)
+			    		WebMvcLinkBuilder.methodOn(DepartmentController.class).getDepartment(id)
 			    ).withSelfRel(),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(DepartmentController.class)
 			    			.createDepartment(dept))
-			    .withRel("createRole"),
+			    .withRel("createDepartment"),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(DepartmentController.class)
 			    			.updateDepartment(dept))
-			    .withRel("updateEmployee"),
+			    .withRel("updateDepartment"),
 			    WebMvcLinkBuilder.linkTo(
 			    		WebMvcLinkBuilder.methodOn(DepartmentController.class)
 			    			.deleteDepartment(id))
-			    .withRel("deleteLicense"));
+			    .withRel("deleteDepartment"));
 		
-		return ResponseEntity.ok(dept);
+		return deptDTO;
 	}
 
 	@PostMapping
-	public ResponseEntity<?> createDepartment(@RequestBody Department department) {
+	public DepartmentDTO createDepartment(@RequestBody Department department) throws Exception {
 		department = departmentService.createDepartment(department);
 		if (department == null) {
-			return ResponseEntity.badRequest().body("Department with given name already exists");
+			throw new RecordAlreadyExistsException();
 		}
-		return ResponseEntity.ok(department);
+		DepartmentDTO deptDto = this.getDepartmentDTO(department);
+		deptDto.add(
+			WebMvcLinkBuilder.linkTo(
+				WebMvcLinkBuilder.methodOn(DepartmentController.class).getDepartment(department.getId())
+			).withSelfRel(),
+			WebMvcLinkBuilder.linkTo(
+					WebMvcLinkBuilder.methodOn(DepartmentController.class)
+						.createDepartment(department))
+				.withRel("createDepartment"),
+			WebMvcLinkBuilder.linkTo(
+					WebMvcLinkBuilder.methodOn(DepartmentController.class)
+						.updateDepartment(department))
+				.withRel("updateDepartment"),
+			WebMvcLinkBuilder.linkTo(
+					WebMvcLinkBuilder.methodOn(DepartmentController.class)
+						.deleteDepartment(department.getId()))
+				.withRel("deleteDepartment"));
+		return deptDto;
 	}
 	
 	@PutMapping
@@ -70,7 +89,7 @@ public class DepartmentController {
 		}
 		Department updatedDept = departmentService.updateDepartment(department);
 		if (updatedDept == null) {
-			return ResponseEntity.badRequest().body("Department with given id not found");
+			throw new RecordNotFoundException();
 		}
 		return ResponseEntity.ok(updatedDept);
 	}

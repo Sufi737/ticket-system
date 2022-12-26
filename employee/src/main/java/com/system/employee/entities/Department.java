@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name="department")
-public class Department extends RepresentationModel<Department>{
+public class Department {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
