@@ -1,28 +1,30 @@
 package com.system.employee.services;
 
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.system.employee.entities.Department;
-import com.system.employee.repositories.DepartmentRepository;
-
 import brave.ScopedSpan;
 import brave.Tracer;
+import com.system.employee.entities.Department;
+import com.system.employee.repositories.DepartmentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class DepartmentService {
 
-	@Autowired
 	private DepartmentRepository departmentRepository;
-	
-	@Autowired
 	Tracer tracer;
-	
-	Logger logger = LoggerFactory.getLogger(DepartmentService.class);
+	Logger logger;
+
+	DepartmentService(
+		DepartmentRepository departmentRepository,
+		Tracer tracer
+	) {
+		this.departmentRepository = departmentRepository;
+		this.tracer = tracer;
+		this.logger = LoggerFactory.getLogger(DepartmentService.class);
+	}
 	
 	public Optional<Department> getDepartment(Integer id) {
 		ScopedSpan deptGetSpan = tracer.startScopedSpan("getDepartmentDatabaseCall");
@@ -48,7 +50,6 @@ public class DepartmentService {
 				return null;
 			}
 			department = departmentRepository.save(department);
-			return department;
 		} catch (Exception e) {
 			logger.debug("Exception creating department by id: "+e.getMessage());
 			logger.debug("Exception trace: "+e.getStackTrace());
@@ -57,7 +58,7 @@ public class DepartmentService {
 			deptSpan.annotate("Client received");
 			deptSpan.finish();
 		}
-		return null;
+		return department;
 		
 	}
 	
@@ -67,15 +68,14 @@ public class DepartmentService {
 			Optional<Department> existingDepartment = departmentRepository.findById(department.getId());
 			if (existingDepartment.isPresent()) {
 				department = departmentRepository.save(department);
+				deptSpan.tag("peer.service", "mysql");
+				deptSpan.annotate("Client received");
+				deptSpan.finish();
 				return department;
 			}
 		} catch (Exception e) {
 			logger.debug("Exception updating department by id: "+e.getMessage());
 			logger.debug("Exception trace: "+e.getStackTrace());
-		} finally {
-			deptSpan.tag("peer.service", "mysql");
-			deptSpan.annotate("Client received");
-			deptSpan.finish();
 		}
 		return null;
 	}
