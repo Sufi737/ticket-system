@@ -28,69 +28,45 @@ public class DepartmentService {
 	
 	public Optional<Department> getDepartment(Integer id) {
 		ScopedSpan deptGetSpan = tracer.startScopedSpan("getDepartmentDatabaseCall");
-		try {
-			Optional<Department> department = departmentRepository.findById(id);
-			return department;
-		} catch (Exception e) {
-			logger.debug("Exception getting department by id: "+e.getMessage());
-			logger.debug("Exception trace: "+e.getStackTrace());
-		} finally {
-			deptGetSpan.tag("peer.service", "mysql");
-			deptGetSpan.annotate("Client received");
-			deptGetSpan.finish();
-		}
-		return null;
+		Optional<Department> department = departmentRepository.findById(id);
+		deptGetSpan.tag("peer.service", "mysql");
+		deptGetSpan.annotate("Client received");
+		deptGetSpan.finish();
+		return department;
 	}
 	
 	public Department createDepartment(Department department) {
 		ScopedSpan deptSpan = tracer.startScopedSpan("createDepartmentDatabaseCall");
-		try {
-			Department existingDepartment = departmentRepository.findByDepartmentName(department.getDepartmentName());
-			if (existingDepartment != null) {
-				return null;
-			}
-			department = departmentRepository.save(department);
-		} catch (Exception e) {
-			logger.debug("Exception creating department by id: "+e.getMessage());
-			logger.debug("Exception trace: "+e.getStackTrace());
-		} finally {
-			deptSpan.tag("peer.service", "mysql");
-			deptSpan.annotate("Client received");
-			deptSpan.finish();
+		Department existingDepartment = departmentRepository.findByDepartmentName(department.getDepartmentName());
+		if (existingDepartment != null) {
+			return null;
 		}
+		department = departmentRepository.save(department);
+		deptSpan.tag("peer.service", "mysql");
+		deptSpan.annotate("Client received");
+		deptSpan.finish();
 		return department;
 		
 	}
 	
 	public Department updateDepartment(Department department) {
 		ScopedSpan deptSpan = tracer.startScopedSpan("updateDepartmentDatabaseCall");
-		try {
-			Optional<Department> existingDepartment = departmentRepository.findById(department.getId());
-			if (existingDepartment.isPresent()) {
-				department = departmentRepository.save(department);
-				deptSpan.tag("peer.service", "mysql");
-				deptSpan.annotate("Client received");
-				deptSpan.finish();
-				return department;
-			}
-		} catch (Exception e) {
-			logger.debug("Exception updating department by id: "+e.getMessage());
-			logger.debug("Exception trace: "+e.getStackTrace());
+		Optional<Department> existingDepartment = departmentRepository.findById(department.getId());
+		if (existingDepartment.isPresent()) {
+			department = departmentRepository.save(department);
+			deptSpan.tag("peer.service", "mysql");
+			deptSpan.annotate("Client received");
+			deptSpan.finish();
+			return department;
 		}
 		return null;
 	}
 	
 	public void deleteDepartment(Integer id) {
 		ScopedSpan deptSpan = tracer.startScopedSpan("deleteDepartmentDatabaseCall");
-		try {
-			departmentRepository.deleteById(id);
-		} catch (Exception e) {
-			logger.debug("Exception updating department by id: "+e.getMessage());
-			logger.debug("Exception trace: "+e.getStackTrace());
-		} finally {
-			deptSpan.tag("peer.service", "mysql");
-			deptSpan.annotate("Client received");
-			deptSpan.finish();
-		}
+		departmentRepository.deleteById(id);
+		deptSpan.tag("peer.service", "mysql");
+		deptSpan.annotate("Client received");
+		deptSpan.finish();
 	}
 }

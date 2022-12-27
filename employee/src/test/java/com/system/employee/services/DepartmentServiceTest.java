@@ -92,7 +92,7 @@ public class DepartmentServiceTest {
     @Test
     void testUpdateDepartmentReturnsNullWhenDepartmentNotPresent() {
         when(tracer.startScopedSpan("updateDepartmentDatabaseCall")).thenReturn(scopedSpan);
-        when(departmentRepository.findById(1)).thenReturn(null);
+        when(departmentRepository.findById(1)).thenReturn(Optional.ofNullable(null));
         Department updatedDepartment = new Department(1, "Updated");
         assertThat(departmentService.updateDepartment(updatedDepartment)).isEqualTo(null);
     }
