@@ -36,7 +36,7 @@ public class DepartmentServiceTest {
     private DepartmentService departmentService;
 
     @Test
-    void testGetDepartmentWhenDepartmentIsPresent() {
+    void Get_Department_When_Department_Is_Present() {
         when(tracer.startScopedSpan("getDepartmentDatabaseCall")).thenReturn(scopedSpan);
         Optional<Department> department = Optional.of(new Department(1, "Tech"));
         when(departmentRepository.findById(1)).thenReturn(department);
@@ -47,7 +47,7 @@ public class DepartmentServiceTest {
     }
 
     @Test
-    void testGetDepartmentWhenDepartmentNotPresent() {
+    void Return_Null_When_Department_Not_Present() {
         when(tracer.startScopedSpan("getDepartmentDatabaseCall")).thenReturn(scopedSpan);
         when(departmentRepository.findById(1)).thenReturn(null);
         assertThat(departmentService.getDepartment(1)).isEqualTo(null);
@@ -57,7 +57,7 @@ public class DepartmentServiceTest {
     }
 
     @Test
-    void testCreateDepartmentWhenNoExistingDepartment() {
+    void Create_Department_When_No_Other_Department_Exists() {
         when(tracer.startScopedSpan("createDepartmentDatabaseCall")).thenReturn(scopedSpan);
         when(departmentRepository.findByDepartmentName("Tech")).thenReturn(null);
         Department department = new Department(1, "Tech");
@@ -69,7 +69,7 @@ public class DepartmentServiceTest {
     }
 
     @Test
-    void testCreateDepartmentWhenDepartmentWithSameNameExists() {
+    void Return_Null_On_Create_Department_When_Department_Exists_With_Same_Name() {
         when(tracer.startScopedSpan("createDepartmentDatabaseCall")).thenReturn(scopedSpan);
         Department department = new Department(1, "Tech");
         when(departmentRepository.findByDepartmentName("Tech")).thenReturn(department);
@@ -77,7 +77,7 @@ public class DepartmentServiceTest {
     }
 
     @Test
-    void testUpdateDepartmentWhenDepartmentIsPresent() {
+    void Update_Department_When_Department_Present() {
         when(tracer.startScopedSpan("updateDepartmentDatabaseCall")).thenReturn(scopedSpan);
         Optional<Department> department = Optional.of(new Department(1, "Tech"));
         Department updatedDepartment = new Department(1, "Updated");
@@ -90,7 +90,7 @@ public class DepartmentServiceTest {
     }
 
     @Test
-    void testUpdateDepartmentReturnsNullWhenDepartmentNotPresent() {
+    void Update_Department_Returns_Null_When_Department_Not_Present() {
         when(tracer.startScopedSpan("updateDepartmentDatabaseCall")).thenReturn(scopedSpan);
         when(departmentRepository.findById(1)).thenReturn(Optional.ofNullable(null));
         Department updatedDepartment = new Department(1, "Updated");
@@ -98,7 +98,7 @@ public class DepartmentServiceTest {
     }
 
     @Test
-    void testDeleteDepartment() {
+    void Delete_Department() {
         when(tracer.startScopedSpan("deleteDepartmentDatabaseCall")).thenReturn(scopedSpan);
         doNothing().when(departmentRepository).deleteById(1);
         departmentService.deleteDepartment(1);

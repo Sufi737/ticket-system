@@ -6,7 +6,6 @@ import com.system.employee.exceptions.RecordAlreadyExistsException;
 import com.system.employee.exceptions.RecordNotFoundException;
 import com.system.employee.services.DepartmentService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +17,16 @@ import java.util.Optional;
 //@RolesAllowed("ADMIN")
 public class DepartmentController {
 
-	@Autowired
 	private DepartmentService departmentService;
-
-	@Autowired
 	private ModelMapper modelMapper;
+
+	DepartmentController(
+		DepartmentService departmentService,
+		ModelMapper modelMapper
+	) {
+		this.departmentService = departmentService;
+		this.modelMapper = modelMapper;
+	}
 
 	private DepartmentDTO getDepartmentDTO(Department department) {
 		return this.modelMapper.map(department, DepartmentDTO.class);
